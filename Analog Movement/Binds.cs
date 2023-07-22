@@ -30,7 +30,7 @@ public class ButtonBinds : PlayerActionSet
     }
     private void DefaultBinds()
     {
-        upswingAction.AddDefaultBinding(InputControlType.LeftTrigger);
-        downswingAction.AddDefaultBinding(InputControlType.RightTrigger);
+        upswingAction.AddDefaultBinding(InputControlType.LeftStickButton);
+        downswingAction.AddDefaultBinding(InputControlType.RightStickButton);
     }
 }

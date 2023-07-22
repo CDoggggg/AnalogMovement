@@ -40,18 +40,19 @@ namespace AnalogMovement
             On.HeroController.FilterInput += RemoveFilterInput;
             On.HeroController.DoAttack += FixAttackDirection;
             ModHooks.HeroUpdateHook += ListenForSwingBindings;
-            oldAttack = InputHandler.Instance.inputActions.attack.add;
+            oldAttack = InputHandler.Instance.inputActions.attack;
         }
 
         public void ListenForSwingBindings()
         {
-            if (globalSettings.swingKeyBinds.upswingAction.IsPressed || globalSettings.swingKeyBinds.downswingAction.IsPressed || globalSettings.swingButtonBinds.upswingAction.IsPressed || globalSettings.swingButtonBinds.downswingAction.IsPressed)
+            if (globalSettings.enableVerticalSwingKeyBinds)
             {
-                HeroController.DoAttack();
-                if (globalSettings.swingButtonBinds.downswingAction.IsPressed)
-                {
-                    InputHandler.Instance.inputActions.attack.ResetBindings();
-                }
+                InControl.PlayerAction upKey = globalSettings.swingKeyBinds.upswingAction;
+                InControl.PlayerAction downKey = globalSettings.swingKeyBinds.downswingAction;
+                InControl.PlayerAction upButton = globalSettings.swingButtonBinds.upswingAction;
+                InControl.PlayerAction downButton = globalSettings.swingButtonBinds.downswingAction;
+                InputHandler.Instance.inputActions.attack = (upKey.IsPressed) ? upKey : (downKey.IsPressed) ? downKey :
+                                                            (upButton.IsPressed) ? upButton : (downButton.IsPressed) ? downButton : oldAttack;
             }
         }
 
@@ -62,14 +63,17 @@ namespace AnalogMovement
             ResetLookParameters(self);
 
             double swingAngle = Math.Atan(Math.Abs(self.vertical_input) / Math.Abs(self.move_input)) * (180f / Math.PI);
-            if (swingAngle >= globalSettings.verticalSwingAngle || globalSettings.swingKeyBinds.upswingAction.IsPressed || globalSettings.swingKeyBinds.downswingAction.IsPressed || globalSettings.swingButtonBinds.upswingAction.IsPressed || globalSettings.swingButtonBinds.downswingAction.IsPressed)
+            if (swingAngle >= globalSettings.verticalSwingAngle || 
+                ((globalSettings.swingKeyBinds.upswingAction.IsPressed || globalSettings.swingKeyBinds.downswingAction.IsPressed ||
+                  globalSettings.swingButtonBinds.upswingAction.IsPressed || globalSettings.swingButtonBinds.downswingAction.IsPressed)
+                 && globalSettings.enableVerticalSwingKeyBinds))
             {
-                if (globalSettings.swingKeyBinds.upswingAction.IsPressed || globalSettings.swingButtonBinds.upswingAction.IsPressed)
+                if ((globalSettings.swingKeyBinds.upswingAction.IsPressed || globalSettings.swingButtonBinds.upswingAction.IsPressed) && globalSettings.enableVerticalSwingKeyBinds)
                 {
                     self.Attack(AttackDirection.upward);
                     self.StartCoroutine(self.CheckForTerrainThunk(AttackDirection.upward));
                 }
-                else if (globalSettings.swingKeyBinds.downswingAction.IsPressed || globalSettings.swingButtonBinds.downswingAction.IsPressed)
+                else if ((globalSettings.swingKeyBinds.downswingAction.IsPressed || globalSettings.swingButtonBinds.downswingAction.IsPressed) && globalSettings.enableVerticalSwingKeyBinds)
                 {
                     if (self.hero_state != ActorStates.idle && self.hero_state != ActorStates.running)
                     {
